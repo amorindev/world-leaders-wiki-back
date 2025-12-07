@@ -3,7 +3,7 @@ version: "3.9"
 services:
   mongodb:
     image: mongo:8
-    container_name: go_tmpl_db
+    container_name: world_leaders_wiki_db
     restart: unless-stopped
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
@@ -13,7 +13,7 @@ services:
 
   minio:
     image: quay.io/minio/minio
-    container_name: go_tmpl_minio
+    container_name: world_leaders_wiki_minio
     restart: unless-stopped
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
