@@ -11,11 +11,14 @@ import (
 	resendClient "github.com/amorindev/go-tmpl/internal/resend"
 	tokenService "github.com/amorindev/go-tmpl/internal/tokens/service"
 	adminHandler "github.com/amorindev/go-tmpl/pkg/features/admin/api/handler"
+	leaderHandler "github.com/amorindev/go-tmpl/pkg/features/app/leader/handler"
+	leaderRepository "github.com/amorindev/go-tmpl/pkg/features/app/leader/repository/mongo"
+	leaderService "github.com/amorindev/go-tmpl/pkg/features/app/leader/service"
 	authHandler "github.com/amorindev/go-tmpl/pkg/features/auth/handler"
 	authService "github.com/amorindev/go-tmpl/pkg/features/auth/service"
 	resendAdapter "github.com/amorindev/go-tmpl/pkg/features/mailer/adapter/resend"
-	"github.com/amorindev/go-tmpl/pkg/features/mailer/service"
-	"github.com/amorindev/go-tmpl/pkg/features/opt-codes/repository/mongo"
+	mailerService "github.com/amorindev/go-tmpl/pkg/features/mailer/service"
+	otpCodeRepository "github.com/amorindev/go-tmpl/pkg/features/opt-codes/repository/mongo"
 	otpCodeService "github.com/amorindev/go-tmpl/pkg/features/opt-codes/service"
 
 	sessionRepository "github.com/amorindev/go-tmpl/pkg/features/session/repository/mongo"
@@ -68,10 +71,16 @@ func New() http.Handler {
 	sessionColl := mongoDB.Collection("sessions")
 	otpCodeColl := mongoDB.Collection("opt-codes")
 
+	// Collections - app
+	leaderColl := mongoDB.Collection("leaders")
+
 	// Repositories
 	userRepo := userRepository.NewUserRepo(mongoConn.DB, userColl)
 	sessionRepo := sessionRepository.NewSessionRepo(mongoConn.DB, sessionColl)
-	otpCodeRepo := mongo.NewOtpCodeRepo(mongoConn.DB, otpCodeColl)
+	otpCodeRepo := otpCodeRepository.NewOtpCodeRepo(mongoConn.DB, otpCodeColl)
+
+	// Repositories - app
+	leaderRepo := leaderRepository.NewLeaderRepo(mongoConn.DB, leaderColl)
 
 	// Indexes
 	err = userRepo.CreateIndexes()
@@ -89,14 +98,20 @@ func New() http.Handler {
 	tokenSrv := tokenService.NewTokenSrv(appEnvs.JWTAccessSecret, appEnvs.JWTRefreshSecret, appEnvs.JWTAccessExpIn, appEnvs.JWTRefreshExpIn, appEnvs.JWTRefreshRememberMeExpIn, appEnvs.JWTIssuer)
 	sessionSrv := sessionService.NewSessionSrv(sessionRepo, tokenSrv)
 	otpCodeSrv := otpCodeService.NewOtpCodeSrv(otpCodeRepo)
-	mailerSrv := service.NewMailerSrv(mailerAdt, appEnvs.AppName)
+	mailerSrv := mailerService.NewMailerSrv(mailerAdt, appEnvs.AppName)
 	authSrv := authService.NewAuthSrv(userRepo, userFileStg, sessionSrv, otpCodeSrv, mailerSrv)
 	userSrv := userService.NewUserSrv(userRepo, userFileStg)
 
+	// Services - app
+	leaderSrv := leaderService.NewLeaderSrv(leaderRepo)
+
 	// Handler
 	// Note: all subsequent handlers should also be registered using v1
-	authHandler.NewAuthHandler(v1, authSrv, tokenSrv,appEnvs.AppEnv)
+	authHandler.NewAuthHandler(v1, authSrv, tokenSrv, appEnvs.AppEnv)
 	userHandler.NewUserHandler(v1, userSrv)
+
+	// Handler - app
+	leaderHandler.NewLeaderHandler(v1, leaderSrv)
 
 	mux.HandleFunc("GET /ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
