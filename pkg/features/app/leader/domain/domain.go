@@ -7,13 +7,15 @@ import "time"
 // ImgUrl is used only for responses to the client (not stored in the database).
 // ImgPath is stored in the database and used by the backend to build the final public URL.
 type Leader struct {
-	ID        interface{} `json:"id" bson:"_id"`
-	FullName  string      `json:"full_name" bson:"full_name"`
-	NickName  *string     `json:"nickname" bson:"nickname"`
-	Phrase    *string     `json:"phrase" bson:"phrase"`
-	Biography string      `json:"biography" bson:"biography"`
-	ImgUrl    *string     `json:"img_url" bson:"-"`
-	ImgPath   *string     `json:"-" bson:"img_path"`
+	ID         interface{} `json:"id" bson:"_id"`
+	FullName   string      `json:"full_name" bson:"full_name"`
+	NickName   *string     `json:"nickname" bson:"nickname"`
+	Phrase     *string     `json:"phrase" bson:"phrase"`
+	Biography  string      `json:"biography" bson:"biography"`
+	AvatarUrl  *string     `json:"avatar_url" bson:"-"`
+	BannerUrl  *string     `json:"banner_url" bson:"-"`
+	AvatarPath *string     `json:"-" bson:"avatar_path"`
+	BannerPath *string     `json:"-" bson:"banner_path"`
 
 	BirthDate   *time.Time `json:"birth_date" bson:"birth_date"`
 	Nationality string     `json:"nationality" bson:"nationality"`

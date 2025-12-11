@@ -11,6 +11,7 @@ import (
 	resendClient "github.com/amorindev/go-tmpl/internal/resend"
 	tokenService "github.com/amorindev/go-tmpl/internal/tokens/service"
 	adminHandler "github.com/amorindev/go-tmpl/pkg/features/admin/api/handler"
+	leaderFileStorage "github.com/amorindev/go-tmpl/pkg/features/app/leader/file-storage/minio"
 	leaderHandler "github.com/amorindev/go-tmpl/pkg/features/app/leader/handler"
 	leaderRepository "github.com/amorindev/go-tmpl/pkg/features/app/leader/repository/mongo"
 	leaderService "github.com/amorindev/go-tmpl/pkg/features/app/leader/service"
@@ -93,6 +94,7 @@ func New() http.Handler {
 
 	// File Storage
 	userFileStg := userFileStorage.NewUserFileStg(minioC.Client, appEnvs.MinioBucketName, 0)
+	leaderFileStg := leaderFileStorage.NewLeaderFileStg(minioC.Client, appEnvs.MinioBucketName, appEnvs.MinioEndpoint)
 
 	// Services
 	tokenSrv := tokenService.NewTokenSrv(appEnvs.JWTAccessSecret, appEnvs.JWTRefreshSecret, appEnvs.JWTAccessExpIn, appEnvs.JWTRefreshExpIn, appEnvs.JWTRefreshRememberMeExpIn, appEnvs.JWTIssuer)
@@ -103,7 +105,7 @@ func New() http.Handler {
 	userSrv := userService.NewUserSrv(userRepo, userFileStg)
 
 	// Services - app
-	leaderSrv := leaderService.NewLeaderSrv(leaderRepo)
+	leaderSrv := leaderService.NewLeaderSrv(leaderRepo, leaderFileStg)
 
 	// Handler
 	// Note: all subsequent handlers should also be registered using v1
