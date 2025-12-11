@@ -14,7 +14,6 @@ type CreateLeaderReq struct {
 	FullName  string  `json:"full_name"`
 	Phrase    *string `json:"phrase"`
 	Nickname  *string `json:"nickname"`
-	ImgUrl    *string `json:"img_url"`
 	Biography string  `json:"biography"`
 
 	BirthDate   *time.Time `json:"birth_date"`
@@ -82,9 +81,6 @@ func (req *CreateLeaderReq) IsCreateLeaderValid() error {
 		return err
 	}
 	if err := validateOptionalURL(req.Website, "website"); err != nil {
-		return err
-	}
-	if err := validateOptionalURL(req.ImgUrl, "img_url"); err != nil {
 		return err
 	}
 
