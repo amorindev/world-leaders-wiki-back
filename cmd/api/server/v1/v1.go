@@ -15,6 +15,9 @@ import (
 	leaderHandler "github.com/amorindev/go-tmpl/pkg/features/app/leader/handler"
 	leaderRepository "github.com/amorindev/go-tmpl/pkg/features/app/leader/repository/mongo"
 	leaderService "github.com/amorindev/go-tmpl/pkg/features/app/leader/service"
+	pPartyHandler "github.com/amorindev/go-tmpl/pkg/features/app/political-party/handler"
+	pPartyRepository "github.com/amorindev/go-tmpl/pkg/features/app/political-party/repository/mongo"
+	pPartyService "github.com/amorindev/go-tmpl/pkg/features/app/political-party/service"
 	authHandler "github.com/amorindev/go-tmpl/pkg/features/auth/handler"
 	authService "github.com/amorindev/go-tmpl/pkg/features/auth/service"
 	resendAdapter "github.com/amorindev/go-tmpl/pkg/features/mailer/adapter/resend"
@@ -74,6 +77,7 @@ func New() http.Handler {
 
 	// Collections - app
 	leaderColl := mongoDB.Collection("leaders")
+	pPartyColl := mongoDB.Collection("political-parties")
 
 	// Repositories
 	userRepo := userRepository.NewUserRepo(mongoConn.DB, userColl)
@@ -82,6 +86,7 @@ func New() http.Handler {
 
 	// Repositories - app
 	leaderRepo := leaderRepository.NewLeaderRepo(mongoConn.DB, leaderColl)
+	pPartyRepo := pPartyRepository.NewPPartyRepo(mongoConn.DB, pPartyColl)
 
 	// Indexes
 	err = userRepo.CreateIndexes()
@@ -106,6 +111,7 @@ func New() http.Handler {
 
 	// Services - app
 	leaderSrv := leaderService.NewLeaderSrv(leaderRepo, leaderFileStg)
+	pPartySrv := pPartyService.NewPPartySrv(pPartyRepo)
 
 	// Handler
 	// Note: all subsequent handlers should also be registered using v1
@@ -114,6 +120,7 @@ func New() http.Handler {
 
 	// Handler - app
 	leaderHandler.NewLeaderHandler(v1, leaderSrv)
+	pPartyHandler.NewPPartyHandler(v1, pPartySrv)
 
 	mux.HandleFunc("GET /ping", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
