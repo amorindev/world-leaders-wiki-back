@@ -1,12 +1,12 @@
 package core
 
 import (
-	"net/url"
 	"strings"
 	"time"
 
 	"github.com/amorindev/go-tmpl/pkg/shared/domain"
 	sharedD "github.com/amorindev/go-tmpl/pkg/shared/domain"
+	"github.com/amorindev/go-tmpl/pkg/shared/validator"
 )
 
 // CreateLeaderReq represents the request structure for Leader creation
@@ -65,46 +65,24 @@ func (req *CreateLeaderReq) IsCreateLeaderValid() error {
 		}
 	}
 
-	if err := validateSocialURL(req.Facebook, "facebook"); err != nil {
-		return err
+	if err := validator.ValidateSocialURL(req.Facebook, "facebook"); err != nil {
+		return sharedD.NewAppError(domain.ErrCodeInvalidParams, err.Error())
 	}
-	if err := validateSocialURL(req.Instagram, "instagram"); err != nil {
-		return err
+	if err := validator.ValidateSocialURL(req.Instagram, "instagram"); err != nil {
+		return sharedD.NewAppError(domain.ErrCodeInvalidParams, err.Error())
 	}
-	if err := validateOptionalURL(req.Twitter, "twitter"); err != nil {
-		return err
+	if err := validator.ValidateOptionalURL(req.Twitter, "twitter"); err != nil {
+		return sharedD.NewAppError(domain.ErrCodeInvalidParams, err.Error())
 	}
-	if err := validateOptionalURL(req.YouTube, "youtube"); err != nil {
-		return err
+	if err := validator.ValidateOptionalURL(req.YouTube, "youtube"); err != nil {
+		return sharedD.NewAppError(domain.ErrCodeInvalidParams, err.Error())
 	}
-	if err := validateOptionalURL(req.Linkedin, "linkedin"); err != nil {
-		return err
+	if err := validator.ValidateOptionalURL(req.Linkedin, "linkedin"); err != nil {
+		return sharedD.NewAppError(domain.ErrCodeInvalidParams, err.Error())
 	}
-	if err := validateOptionalURL(req.Website, "website"); err != nil {
-		return err
+	if err := validator.ValidateOptionalURL(req.Website, "website"); err != nil {
+		return sharedD.NewAppError(domain.ErrCodeInvalidParams, err.Error())
 	}
 
-	return nil
-}
-
-func validateSocialURL(urlStr, field string) error {
-	if strings.TrimSpace(urlStr) == "" {
-		return sharedD.NewAppError(domain.ErrCodeInvalidParams, field+" is required")
-	}
-	return validateURL(urlStr, field)
-}
-
-func validateOptionalURL(urlStr *string, field string) error {
-	if urlStr == nil || strings.TrimSpace(*urlStr) == "" {
-		return nil
-	}
-	return validateURL(*urlStr, field)
-}
-
-func validateURL(u, field string) error {
-	parsed, err := url.ParseRequestURI(u)
-	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
-		return sharedD.NewAppError(domain.ErrCodeInvalidParams, field+" must be a valid URL")
-	}
 	return nil
 }
