@@ -1,6 +1,8 @@
 package minio
 
 import (
+	"time"
+
 	"github.com/amorindev/go-tmpl/pkg/features/app/leader/port"
 	"github.com/minio/minio-go/v7"
 )
@@ -10,13 +12,16 @@ var _ port.LeaderFileStg = &FileStorage{}
 type FileStorage struct {
 	MinioClient *minio.Client
 	BucketName  string
-	BaseUrl     string
+	ExpTime     time.Duration
 }
 
-func NewLeaderFileStg(client *minio.Client, bucketName string, baseUrl string) *FileStorage {
+func NewLeaderFileStg(client *minio.Client, bucketName string, expTime time.Duration) *FileStorage {
+	if expTime == 0 {
+		expTime = time.Hour * 24 * 7
+	}
 	return &FileStorage{
 		MinioClient: client,
 		BucketName:  bucketName,
-		BaseUrl:     baseUrl,
+		ExpTime:     expTime,
 	}
 }
