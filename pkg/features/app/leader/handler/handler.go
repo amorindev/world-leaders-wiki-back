@@ -17,6 +17,7 @@ func NewLeaderHandler(server *http.ServeMux, leaderSrv port.LeaderSrv) *Handler 
 
 	server.HandleFunc("POST /leaders", h.Create)
 	server.HandleFunc("POST /leaders/{leaderId}/image/{type}", h.UploadAvatar)
+	server.HandleFunc("GET /leaders/random", h.GetRandom)
 	
 	return h
 }
