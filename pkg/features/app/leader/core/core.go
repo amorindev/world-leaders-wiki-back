@@ -19,12 +19,13 @@ type CreateLeaderReq struct {
 	Biography string  `json:"biography"`
 
 	BirthDate   *time.Time `json:"birth_date"`
+	DeathDate   *time.Time `json:"death_date"`
 	Nationality string     `json:"nationality"`
 	Gender      string     `json:"gender"`
 	Ideology    *string    `json:"ideology"`
 
-	Facebook  string  `json:"facebook"`
-	Instagram string  `json:"instagram"`
+	Facebook  *string `json:"facebook"`
+	Instagram *string `json:"instagram"`
 	Twitter   *string `json:"twitter"`
 	YouTube   *string `json:"youtube"`
 	Linkedin  *string `json:"linkedin"`
@@ -38,22 +39,23 @@ type CreateLeaderReq struct {
 //   - single hyphens between words
 //
 // Examples (valid):
-//   rafael
-//   rafael-lopez
-//   rafael-lopez-aliaga
+//
+//	rafael
+//	rafael-lopez
+//	rafael-lopez-aliaga
 //
 // Examples (invalid):
-//   Rafael-Lopez   // uppercase letters
-//   rafael_lopez   // underscores (_)
-//   rafael lopez   // spaces
-//   rafael--lopez  // double hyphens
-//   -rafael        // starts with hyphen
-//   rafael-        // ends with hyphen
-//   rafaél         // accented characters
-//   rafael!        // special characters
-//   @rafael        // '@' is not allowed
+//
+//	Rafael-Lopez   // uppercase letters
+//	rafael_lopez   // underscores (_)
+//	rafael lopez   // spaces
+//	rafael--lopez  // double hyphens
+//	-rafael        // starts with hyphen
+//	rafael-        // ends with hyphen
+//	rafaél         // accented characters
+//	rafael!        // special characters
+//	@rafael        // '@' is not allowed
 var slugRegex = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
-
 
 func (req *CreateLeaderReq) IsCreateLeaderValid() error {
 	// Validate email field is not empty
@@ -106,10 +108,28 @@ func (req *CreateLeaderReq) IsCreateLeaderValid() error {
 		}
 	}
 
-	if err := validator.ValidateSocialURL(req.Facebook, "facebook"); err != nil {
+	if req.DeathDate != nil {
+		// Prevent future death dates
+		if req.DeathDate.After(time.Now()) {
+			return sharedD.NewAppError(
+				domain.ErrCodeInvalidParams,
+				"death_date cannot be in the future",
+			)
+		}
+
+		// Death date must be after birth date
+		if req.BirthDate != nil && req.DeathDate.Before(*req.BirthDate) {
+			return sharedD.NewAppError(
+				domain.ErrCodeInvalidParams,
+				"death_date cannot be before birth_date",
+			)
+		}
+	}
+
+	if err := validator.ValidateOptionalURL(req.Facebook, "facebook"); err != nil {
 		return sharedD.NewAppError(domain.ErrCodeInvalidParams, err.Error())
 	}
-	if err := validator.ValidateSocialURL(req.Instagram, "instagram"); err != nil {
+	if err := validator.ValidateOptionalURL(req.Instagram, "instagram"); err != nil {
 		return sharedD.NewAppError(domain.ErrCodeInvalidParams, err.Error())
 	}
 	if err := validator.ValidateOptionalURL(req.Twitter, "twitter"); err != nil {
