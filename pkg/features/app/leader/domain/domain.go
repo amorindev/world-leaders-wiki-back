@@ -8,6 +8,7 @@ import "time"
 // ImgPath is stored in the database and used by the backend to build the final public URL.
 type Leader struct {
 	ID         interface{} `json:"id" bson:"_id"`
+	Slug       string      `json:"slug" bson:"slug"`
 	FullName   string      `json:"full_name" bson:"full_name"`
 	NickName   *string     `json:"nickname" bson:"nickname"`
 	Phrase     *string     `json:"phrase" bson:"phrase"`

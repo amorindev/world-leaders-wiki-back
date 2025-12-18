@@ -5,7 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-// Make sure Repository implements ports.PlayerRepository
+// Make sure Repository implements ports.LeaderRepo
 // at compile time
 var _ port.LeaderRepo = &Repository{}
 
