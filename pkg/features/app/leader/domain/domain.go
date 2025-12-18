@@ -19,12 +19,13 @@ type Leader struct {
 	BannerPath *string     `json:"-" bson:"banner_path"`
 
 	BirthDate   *time.Time `json:"birth_date" bson:"birth_date"`
+	DeathDate   *time.Time `json:"death_date" bson:"death_date"`
 	Nationality string     `json:"nationality" bson:"nationality"`
 	Gender      string     `json:"gender,omitempty" bson:"gender"`
 	Ideology    *string    `json:"ideology,omitempty" bson:"ideology"`
 
-	Facebook  string  `json:"facebook" bson:"facebook"`
-	Instagram string  `json:"instagram" bson:"instagram"`
+	Facebook  *string `json:"facebook" bson:"facebook"`
+	Instagram *string `json:"instagram" bson:"instagram"`
 	Twitter   *string `json:"twitter" bson:"twitter"`
 	YouTube   *string `json:"youtube" bson:"youtube"`
 	Linkedin  *string `json:"linkedin" bson:"linkedin"`
