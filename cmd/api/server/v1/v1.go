@@ -94,6 +94,11 @@ func New() http.Handler {
 		log.Fatal(err)
 	}
 
+	err = leaderRepo.CreateIndexes()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Adapters
 	mailerAdt := resendAdapter.NewResendAdt(resendCli, appEnvs.EmailFrom)
 

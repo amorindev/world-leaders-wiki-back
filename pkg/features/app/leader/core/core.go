@@ -1,6 +1,7 @@
 package core
 
 import (
+	"regexp"
 	"strings"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 
 // CreateLeaderReq represents the request structure for Leader creation
 type CreateLeaderReq struct {
+	Slug      string  `json:"slug"`
 	FullName  string  `json:"full_name"`
 	Phrase    *string `json:"phrase"`
 	Nickname  *string `json:"nickname"`
@@ -29,10 +31,49 @@ type CreateLeaderReq struct {
 	Website   *string `json:"website"`
 }
 
+// slugRegex validates SEO-friendly slugs.
+// Accepted:
+//   - lowercase letters (a–z)
+//   - numbers (0–9)
+//   - single hyphens between words
+//
+// Examples (valid):
+//   rafael
+//   rafael-lopez
+//   rafael-lopez-aliaga
+//
+// Examples (invalid):
+//   Rafael-Lopez   // uppercase letters
+//   rafael_lopez   // underscores (_)
+//   rafael lopez   // spaces
+//   rafael--lopez  // double hyphens
+//   -rafael        // starts with hyphen
+//   rafael-        // ends with hyphen
+//   rafaél         // accented characters
+//   rafael!        // special characters
+//   @rafael        // '@' is not allowed
+var slugRegex = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
+
+
 func (req *CreateLeaderReq) IsCreateLeaderValid() error {
 	// Validate email field is not empty
 	if strings.TrimSpace(req.FullName) == "" {
 		return sharedD.NewAppError(domain.ErrCodeInvalidParams, "full_name is required")
+	}
+
+	if strings.TrimSpace(req.Slug) == "" {
+		return sharedD.NewAppError(domain.ErrCodeInvalidParams, "slug is required")
+	}
+
+	if len(req.Slug) > 80 {
+		return sharedD.NewAppError(domain.ErrCodeInvalidParams, "slug is too long")
+	}
+
+	if !slugRegex.MatchString(req.Slug) {
+		return sharedD.NewAppError(
+			domain.ErrCodeInvalidParams,
+			"slug format is invalid (use lowercase letters, numbers and hyphens)",
+		)
 	}
 
 	if strings.TrimSpace(req.Biography) == "" {

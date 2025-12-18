@@ -31,6 +31,7 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	leader := &domain.Leader{
+		Slug:        req.Slug,
 		FullName:    req.FullName,
 		NickName:    req.Nickname,
 		Phrase:      req.Phrase,
